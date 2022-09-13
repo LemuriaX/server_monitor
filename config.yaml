@@ -1,0 +1,4 @@
+database:
+  default:
+    type:  "sqlite"
+    link:  ".\\data.db"
