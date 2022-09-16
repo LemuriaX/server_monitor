@@ -8,8 +8,9 @@ import (
 )
 
 func main() {
-	db := util.InitDB()
-	print(db)
+	_ = util.InitDB()
 	cpuInfo := data.GetCPUInfo()
-	fmt.Printf("%v", cpuInfo)
+	fmt.Printf("%v\n", cpuInfo)
+	diskInfo := data.GetDiskInfo()
+	fmt.Printf("%v\n", diskInfo)
 }
