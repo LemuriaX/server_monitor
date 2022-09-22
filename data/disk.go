@@ -18,8 +18,8 @@ type DiskInfo struct {
 	// Usage         float32
 	// Free          float32
 	// OccupancyRate float32
-	Read  float32
-	Write float32
+	// Read  float32
+	// Write float32
 }
 
 func GetAllDisk() map[string]float64 {

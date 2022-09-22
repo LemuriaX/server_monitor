@@ -21,5 +21,8 @@ func main() {
 		diskInfo := data.GetDiskInfo(ctx, key)
 		fmt.Printf("%v\n", diskInfo)
 	}
+	// res := data.GetAllNetworkInterface()
+	networkInfo := data.GetNetworkInfo()
+	fmt.Printf("%v", networkInfo)
 
 }
