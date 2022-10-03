@@ -16,8 +16,10 @@ func main() {
 		diskInfo := data.GetDiskInfo(key)
 		fmt.Printf("%v\n", diskInfo)
 	}
-	// res := data.GetAllNetworkInterface()
+	diskSizeInfo := data.GetDiskSize()
+	fmt.Printf("%v", diskSizeInfo)
 	networkInfo := data.GetNetworkInfo()
 	fmt.Printf("%v", networkInfo)
-
+	memoryInfo := data.GetMemoryInfo()
+	fmt.Printf("%v", memoryInfo)
 }

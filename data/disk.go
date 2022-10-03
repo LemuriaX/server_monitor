@@ -20,22 +20,22 @@ type DiskInfo struct {
 	// Write float32
 }
 
-func GetDiskSize() map[string][]float64 {
+func GetDiskSize() map[string]map[string]float64 {
 	resultString, _ := gproc.ShellExec(gctx.New(), "df | grep \"^/dev/\"")
 	split := gstr.Split(resultString, "\n")
-	var res map[string][]float64
+	res := make(map[string]map[string]float64)
 	for _, info := range split {
 		if gstr.LenRune(info) == 0 {
 			continue
 		}
 		diskInfo := gstr.SplitAndTrim(info, " ")
 
-		if diskInfo[6] == "/boot/efi" || diskInfo[6] == "/dev/pve" {
+		if diskInfo[5] == "/boot/efi" || diskInfo[5] == "/etc/pve" {
 			continue
 		}
-		var r []float64
-		r = append(r, gconv.Float64(diskInfo[2]))
-		r = append(r, gconv.Float64(diskInfo[3]))
+		r := make(map[string]float64)
+		r["used"] = gconv.Float64(diskInfo[2])
+		r["Available"] = gconv.Float64(diskInfo[3])
 		res[diskInfo[0]] = r
 	}
 	return res
