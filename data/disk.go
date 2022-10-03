@@ -1,20 +1,18 @@
 package data
 
 import (
-	"context"
-	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
-	"github.com/gogf/gf/v2/os/gcache"
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/os/gproc"
 	"github.com/gogf/gf/v2/text/gstr"
+	"github.com/gogf/gf/v2/util/gconv"
 	"strconv"
 )
 
 type DiskInfo struct {
 	Name        string
 	Temperature int
-	Size        string
+	// Size        string
 	// Usage         float32
 	// Free          float32
 	// OccupancyRate float32
@@ -22,15 +20,36 @@ type DiskInfo struct {
 	// Write float32
 }
 
-func GetAllDisk() map[string]float64 {
+func GetDiskSize() map[string][]float64 {
+	resultString, _ := gproc.ShellExec(gctx.New(), "df | grep \"^/dev/\"")
+	split := gstr.Split(resultString, "\n")
+	var res map[string][]float64
+	for _, info := range split {
+		if gstr.LenRune(info) == 0 {
+			continue
+		}
+		diskInfo := gstr.SplitAndTrim(info, " ")
+
+		if diskInfo[6] == "/boot/efi" || diskInfo[6] == "/dev/pve" {
+			continue
+		}
+		var r []float64
+		r = append(r, gconv.Float64(diskInfo[2]))
+		r = append(r, gconv.Float64(diskInfo[3]))
+		res[diskInfo[0]] = r
+	}
+	return res
+}
+
+func GetAllDisk() []string {
 	resultString, _ := gproc.ShellExec(gctx.New(), "lsblk --j -db")
 	resultJsons := gjson.New(resultString).Get("blockdevices").Array()
-	diskMap := map[string]float64{}
+	var diskList []string
 	for _, resultJson := range resultJsons {
 		result := resultJson.(map[string]interface{})
-		diskMap["/dev/"+result["name"].(string)] = result["size"].(float64)
+		diskList = append(diskList, "/dev/"+result["name"].(string))
 	}
-	return diskMap
+	return diskList
 }
 
 func GetDiskTemperature(diskName string) int {
@@ -50,17 +69,9 @@ func GetDiskTemperature(diskName string) int {
 	return result
 }
 
-func GetDiskInfo(ctx context.Context, diskName string) *DiskInfo {
+func GetDiskInfo(diskName string) *DiskInfo {
 	diskInfo := &DiskInfo{}
 	diskInfo.Name = diskName
 	diskInfo.Temperature = GetDiskTemperature(diskName)
-	diskMap, _ := gcache.Get(ctx, "diskMap")
-	size := diskMap.MapStrAny()[diskName].(float64) / (1024 * 1024)
-	if size > 1024 {
-		diskInfo.Size = fmt.Sprintf("%.2f GB", size/1024)
-	} else {
-		diskInfo.Size = fmt.Sprintf("%.2f MB", size)
-	}
-
 	return diskInfo
 }
